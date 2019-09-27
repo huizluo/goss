@@ -20,6 +20,15 @@ type tempInfo struct {
 	Size int64
 }
 
+func (t *tempInfo)hash() string{
+	s:=strings.Split(t.Name,".")
+	return s[0]
+}
+func (t *tempInfo) id() int {
+	s:=strings.Split(t.Name,".")
+	id,_:=strconv.Atoi(s[1])
+	return id
+}
 func commitTempObject(datFile string,info tempInfo)  {
 	os.Rename(datFile,objects.STORAGE_PATH+"/objects/"+info.Name)
 	locate.Add(info.Name)
@@ -145,5 +154,5 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	commitTempObject(datFile, tempinfo)
+	commitTempObject(datFile, *tempinfo)
 }

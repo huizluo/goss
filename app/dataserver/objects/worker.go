@@ -1,6 +1,8 @@
 package objects
 
 import (
+	"goss/app/dataserver/locate"
+	"goss/pkg/utils"
 	"io"
 	"log"
 	"net/url"
@@ -14,7 +16,7 @@ func sendFile(w io.Writer, file string) {
 }
 
 func getFile(hash string) string {
-	file := os.Getenv("STORAGE_ROOT") + "/objects/" + hash
+	file := STORAGE_PATH + "/objects/" + hash
 	f, _ := os.Open(file)
 	d := url.PathEscape(utils.CalculateHash(f))
 	f.Close()
