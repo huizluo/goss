@@ -1,11 +1,11 @@
 package temp
 
 import (
-	"go-oss/chapter4/dataServer/locate"
+	"encoding/json"
+	"goss/app/dataserver/locate"
 	"goss/app/dataserver/objects"
 	"io"
 	"io/ioutil"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -20,23 +20,23 @@ type tempInfo struct {
 	Size int64
 }
 
-func (t *tempInfo)hash() string{
-	s:=strings.Split(t.Name,".")
+func (t *tempInfo) hash() string {
+	s := strings.Split(t.Name, ".")
 	return s[0]
 }
 func (t *tempInfo) id() int {
-	s:=strings.Split(t.Name,".")
-	id,_:=strconv.Atoi(s[1])
+	s := strings.Split(t.Name, ".")
+	id, _ := strconv.Atoi(s[1])
 	return id
 }
-func commitTempObject(datFile string,info tempInfo)  {
-	os.Rename(datFile,objects.STORAGE_PATH+"/objects/"+info.Name)
+func commitTempObject(datFile string, info tempInfo) {
+	os.Rename(datFile, objects.STORAGE_PATH+"/objects/"+info.Name)
 	locate.Add(info.Name)
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
 	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
-	infoFile := os.Getenv("STORAGE_ROOT") + "/temp/" + uuid
+	infoFile := objects.STORAGE_PATH + "/temp/" + uuid
 	datFile := infoFile + ".dat"
 	os.Remove(infoFile)
 	os.Remove(datFile)
@@ -50,7 +50,7 @@ func patch(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	infoFile := os.Getenv("STORAGE_ROOT") + "/temp/" + uuid
+	infoFile := objects.STORAGE_PATH + "/temp/" + uuid
 	datFile := infoFile + ".dat"
 	f, e := os.OpenFile(datFile, os.O_WRONLY|os.O_APPEND, 0)
 	if e != nil {
@@ -108,12 +108,12 @@ func post(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	os.Create(os.Getenv("STORAGE_ROOT") + "/temp/" + t.Uuid + ".dat")
+	os.Create(objects.STORAGE_PATH + "/temp/" + t.Uuid + ".dat")
 	w.Write([]byte(uuid))
 }
 
 func (t *tempInfo) writeToFile() error {
-	f, e := os.Create(os.Getenv("STORAGE_ROOT") + "/temp/" + t.Uuid)
+	f, e := os.Create(objects.STORAGE_PATH + "/temp/" + t.Uuid)
 	if e != nil {
 		return e
 	}
@@ -131,7 +131,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	infoFile := os.Getenv("STORAGE_ROOT") + "/temp/" + uuid
+	infoFile := objects.STORAGE_PATH + "/temp/" + uuid
 	datFile := infoFile + ".dat"
 	f, e := os.Open(datFile)
 	if e != nil {

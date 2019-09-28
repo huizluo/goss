@@ -2,12 +2,13 @@ package locate
 
 import (
 	"goss/pkg/rabbitmq"
+	"os"
 	"strconv"
 	"time"
 )
 
 func Locate(name string) string {
-	q := rabbitmq.New("amqp://admin:admin@10.12.32.51:5672")
+	q := rabbitmq.New(os.Getenv("MQ_SERVER"))
 	q.Publish("dataServers", name)
 	c := q.Consume()
 	go func() {

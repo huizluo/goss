@@ -16,7 +16,7 @@ type Metadata struct {
 	Hash    string
 }
 
-const ES_SERVER = "10.12.32.51:9200"
+const ES_SERVER = "127.0.0.1:9200"
 
 type hit struct {
 	Source Metadata `json:"source"`

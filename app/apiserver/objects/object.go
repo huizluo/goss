@@ -20,7 +20,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 	}
 
 	size := utils.GetSizeFromHeader(r.Header)
-	c, e := storeObject(r.Body, url.PathEscape(hash),size)
+	c, e := storeObject(r.Body, url.PathEscape(hash), size)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(c)

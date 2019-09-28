@@ -1,7 +1,6 @@
 package locate
 
 import (
-	"goss/app/dataserver/objects"
 	"goss/pkg/rabbitmq"
 	"os"
 	"path/filepath"
@@ -13,7 +12,7 @@ var objs = make(map[string]int)
 var mutex sync.Mutex
 
 func IsExist(name string) bool {
-	_,err:=os.Stat(name)
+	_, err := os.Stat(name)
 	return !os.IsNotExist(err)
 }
 
@@ -37,7 +36,7 @@ func Del(hash string) {
 }
 
 func StartLocate() {
-	q := rabbitmq.New(objects.RABBITMQ_ADDR)
+	q := rabbitmq.New(os.Getenv("MQ_SERVER"))
 	defer q.Close()
 	q.Bind("dataServers")
 	c := q.Consume()
@@ -48,13 +47,13 @@ func StartLocate() {
 		}
 		exist := Locate(hash)
 		if exist {
-			q.Send(msg.ReplyTo,objects.LISTEN_ADDRESS)
+			q.Send(msg.ReplyTo, "127.0.0.1:8061")
 		}
 	}
 }
 
 func CollectObjects() {
-	files, _ := filepath.Glob(objects.STORAGE_PATH + "/objects/*")
+	files, _ := filepath.Glob("../../data" + "/objects/*")
 	for i := range files {
 		hash := filepath.Base(files[i])
 		objs[hash] = 1

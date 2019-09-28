@@ -23,7 +23,7 @@ func GetOffsetFromHeader(h http.Header) int64 {
 }
 
 func GetHashFromHeader(h http.Header) string {
-	digest := h.Get("digest")
+	digest := h.Get("Digest")
 	if len(digest) < 9 {
 		return ""
 	}
@@ -34,7 +34,7 @@ func GetHashFromHeader(h http.Header) string {
 }
 
 func GetSizeFromHeader(h http.Header) int64 {
-	size, _ := strconv.ParseInt(h.Get("content-length"), 0, 64)
+	size, _ := strconv.ParseInt(h.Get("Content-length"), 0, 64)
 	return size
 }
 
