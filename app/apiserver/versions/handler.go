@@ -19,6 +19,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	size := 1000
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 
+	w.Write([]byte("\n"))
+	w.Write([]byte("----------------"))
+	w.Write([]byte("\n"))
 	for {
 		metas, e := elasticsearch.SearchAllVersions(name, from, size)
 		if e != nil {

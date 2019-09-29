@@ -1,9 +1,6 @@
 package heartbeat
 
 import (
-	"goss/pkg/rabbitmq"
-	"os"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -12,21 +9,22 @@ var dataServers = make(map[string]time.Time)
 var mux sync.Mutex
 
 func ListenHeartbeat() {
-	q := rabbitmq.New(os.Getenv("MQ_SERVER"))
-	defer q.Close()
-	q.Bind("apiServers")
-	c := q.Consume()
-	go removeExpiredDataServer()
-	for msg := range c {
-		dataServer, e := strconv.Unquote(string(msg.Body))
-		if e != nil {
-			panic(e)
-		}
-
-		mux.Lock()
-		dataServers[dataServer] = time.Now()
-		mux.Unlock()
-	}
+	//q := rabbitmq.New(os.Getenv("MQ_SERVER"))
+	//defer q.Close()
+	//q.Bind("apiServers")
+	//c := q.Consume()
+	//go removeExpiredDataServer()
+	//for msg := range c {
+	//	dataServer, e := strconv.Unquote(string(msg.Body))
+	//	if e != nil {
+	//		panic(e)
+	//	}
+	//
+	//	mux.Lock()
+	//	dataServers[dataServer] = time.Now()
+	//	mux.Unlock()
+	//}
+	dataServers["127.0.0.1:8061"] = time.Now()
 }
 
 func removeExpiredDataServer() {

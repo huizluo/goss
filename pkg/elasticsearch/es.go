@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -16,10 +17,10 @@ type Metadata struct {
 	Hash    string
 }
 
-const ES_SERVER = "127.0.0.1:9200"
+const ES_SERVER = "10.12.32.51:9200"
 
 type hit struct {
-	Source Metadata `json:"source"`
+	Source Metadata `json:"_source"`
 }
 
 type searchResult struct {
@@ -46,8 +47,7 @@ func getMetadata(name string, versionId int) (meta Metadata, e error) {
 }
 
 func SearchLatestVersion(name string) (meta Metadata, e error) {
-	url := fmt.Sprintf("http://%s/metadata/_search?q=name:%s&size=1&sort=version:desc",
-		ES_SERVER, url.PathEscape(name))
+	url := fmt.Sprintf("http://%s/metadata/_search?q=name:%s&size=1&sort=version:desc", ES_SERVER, url.PathEscape(name))
 	r, e := http.Get(url)
 	if e != nil {
 		return
@@ -79,6 +79,7 @@ func PutMetadata(name string, version int, size int64, hash string) error {
 	url := fmt.Sprintf("http://%s/metadata/objects/%s_%d?op_type=create",
 		ES_SERVER, name, version)
 	request, _ := http.NewRequest("PUT", url, strings.NewReader(doc))
+	request.Header.Set("Content-type","application/json")
 	r, e := client.Do(request)
 	if e != nil {
 		return e
@@ -102,13 +103,14 @@ func AddVersion(name, hash string, size int64) error {
 }
 
 func SearchAllVersions(name string, from, size int) ([]Metadata, error) {
-	url := fmt.Sprintf("http://%s/metadata/_search?sort=name,version&from=%d&size=%d",
+	url := fmt.Sprintf("http://%s/metadata/_search?sort=version:desc&from=%d&size=%d",
 		ES_SERVER, from, size)
 	if name != "" {
 		url += "&q=name:" + name
 	}
 	r, e := http.Get(url)
 	if e != nil {
+		log.Println(e)
 		return nil, e
 	}
 	metas := make([]Metadata, 0)
@@ -168,6 +170,7 @@ func SearchVersionStatus(min_doc_count int) ([]Bucket, error) {
           }
         }`, min_doc_count)
 	request, _ := http.NewRequest("GET", url, strings.NewReader(body))
+	request.Header.Set("Content-type","application/json")
 	r, e := client.Do(request)
 	if e != nil {
 		return nil, e

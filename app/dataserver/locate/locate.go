@@ -2,6 +2,7 @@ package locate
 
 import (
 	"goss/pkg/rabbitmq"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -35,6 +36,7 @@ func Del(hash string) {
 	mutex.Unlock()
 }
 
+//check obj exist
 func StartLocate() {
 	q := rabbitmq.New(os.Getenv("MQ_SERVER"))
 	defer q.Close()
@@ -42,6 +44,7 @@ func StartLocate() {
 	c := q.Consume()
 	for msg := range c {
 		hash, e := strconv.Unquote(string(msg.Body))
+		log.Println("apiServer check file exist hash:",hash)
 		if e != nil {
 			panic(e)
 		}
@@ -53,7 +56,7 @@ func StartLocate() {
 }
 
 func CollectObjects() {
-	files, _ := filepath.Glob("../../data" + "/objects/*")
+	files, _ := filepath.Glob(os.Getenv("STORAGE_PATH") + "/objects/*")
 	for i := range files {
 		hash := filepath.Base(files[i])
 		objs[hash] = 1

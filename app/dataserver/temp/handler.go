@@ -1,8 +1,12 @@
 package temp
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	log.Println("---------------------")
 	m := r.Method
 	if m == http.MethodPut {
 		put(w, r)

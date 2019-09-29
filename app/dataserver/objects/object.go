@@ -9,7 +9,7 @@ import (
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
-	f, e := os.Create(STORAGE_PATH + "/objects/" + strings.Split(r.URL.EscapedPath(), "/")[2])
+	f, e := os.Create(os.Getenv("STORAGE_PATH") + "/objects/" + strings.Split(r.URL.EscapedPath(), "/")[2])
 	if e != nil {
 		log.Println("put obj")
 		log.Println(e)

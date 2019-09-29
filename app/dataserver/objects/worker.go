@@ -16,7 +16,7 @@ func sendFile(w io.Writer, file string) {
 }
 
 func getFile(hash string) string {
-	file := STORAGE_PATH + "/objects/" + hash
+	file := os.Getenv("STORAGE_PATH") + "/objects/" + hash
 	f, _ := os.Open(file)
 	d := url.PathEscape(utils.CalculateHash(f))
 	f.Close()

@@ -2,6 +2,7 @@ package locate
 
 import (
 	"goss/pkg/rabbitmq"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -17,6 +18,7 @@ func Locate(name string) string {
 	}()
 	msg := <-c
 	s, _ := strconv.Unquote(string(msg.Body))
+	log.Println("dataserver msg:",s)
 	return s
 }
 

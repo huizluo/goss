@@ -3,13 +3,12 @@ package temp
 import (
 	"encoding/json"
 	"goss/app/dataserver/locate"
-	"goss/app/dataserver/objects"
+	"goss/pkg/utils"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -30,19 +29,23 @@ func (t *tempInfo) id() int {
 	return id
 }
 func commitTempObject(datFile string, info tempInfo) {
-	os.Rename(datFile, objects.STORAGE_PATH+"/objects/"+info.Name)
+	if e :=os.Rename(datFile, os.Getenv("STORAGE_PATH")+"/objects/"+info.Name);e!=nil{
+		log.Println(e)
+	}
 	locate.Add(info.Name)
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
+	log.Println("删除obj")
 	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
-	infoFile := objects.STORAGE_PATH + "/temp/" + uuid
+	infoFile := os.Getenv("STORAGE_PATH") + "/temp/" + uuid
 	datFile := infoFile + ".dat"
 	os.Remove(infoFile)
 	os.Remove(datFile)
 }
 
 func patch(w http.ResponseWriter, r *http.Request) {
+	log.Println("保存obj")
 	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
 	tempinfo, e := readFromFile(uuid)
 	if e != nil {
@@ -50,7 +53,7 @@ func patch(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	infoFile := objects.STORAGE_PATH + "/temp/" + uuid
+	infoFile := os.Getenv("STORAGE_PATH") + "/temp/" + uuid
 	datFile := infoFile + ".dat"
 	f, e := os.OpenFile(datFile, os.O_WRONLY|os.O_APPEND, 0)
 	if e != nil {
@@ -81,7 +84,7 @@ func patch(w http.ResponseWriter, r *http.Request) {
 }
 
 func readFromFile(uuid string) (*tempInfo, error) {
-	f, e := os.Open(os.Getenv("STORAGE_ROOT") + "/temp/" + uuid)
+	f, e := os.Open(os.Getenv("STORAGE_PATH") + "/temp/" + uuid)
 	if e != nil {
 		return nil, e
 	}
@@ -92,8 +95,14 @@ func readFromFile(uuid string) (*tempInfo, error) {
 	return &info, nil
 }
 func post(w http.ResponseWriter, r *http.Request) {
-	output, _ := exec.Command("uuidgen").Output()
-	uuid := strings.TrimSuffix(string(output), "\n")
+	log.Println("上传对象")
+	log.Println(os.Getwd())
+	uuid,e:=utils.NewUUID()
+	if e!=nil{
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	size, e := strconv.ParseInt(r.Header.Get("size"), 0, 64)
 	if e != nil {
@@ -108,12 +117,18 @@ func post(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	os.Create(objects.STORAGE_PATH + "/temp/" + t.Uuid + ".dat")
+	f,e:=os.Create(os.Getenv("STORAGE_PATH") + "/temp/" + t.Uuid + ".dat")
+	if e!=nil{
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	f.Close()
+
 	w.Write([]byte(uuid))
 }
 
 func (t *tempInfo) writeToFile() error {
-	f, e := os.Create(objects.STORAGE_PATH + "/temp/" + t.Uuid)
+	f, e := os.Create(os.Getenv("STORAGE_PATH") + "/temp/" + t.Uuid)
 	if e != nil {
 		return e
 	}
@@ -124,6 +139,7 @@ func (t *tempInfo) writeToFile() error {
 }
 
 func put(w http.ResponseWriter, r *http.Request) {
+	log.Println("修改对象")
 	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
 	tempinfo, e := readFromFile(uuid)
 	if e != nil {
@@ -131,7 +147,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	infoFile := objects.STORAGE_PATH + "/temp/" + uuid
+	infoFile := os.Getenv("STORAGE_PATH") + "/temp/" + uuid
 	datFile := infoFile + ".dat"
 	f, e := os.Open(datFile)
 	if e != nil {
@@ -139,7 +155,6 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer f.Close()
 	info, e := f.Stat()
 	if e != nil {
 		log.Println(e)
@@ -154,5 +169,8 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	f.Close()
+	log.Println("临时对象转正")
 	commitTempObject(datFile, *tempinfo)
 }
