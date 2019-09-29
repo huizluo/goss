@@ -5,7 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"goss/app/dataserver/locate"
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
@@ -30,4 +33,14 @@ func get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sendFile(w,f)
+}
+
+func del(w http.ResponseWriter, r *http.Request) {
+	hash := strings.Split(r.URL.EscapedPath(), "/")[2]
+	files, _ := filepath.Glob(os.Getenv("STORAGE_PATH") + "/objects/" + hash + ".*")
+	if len(files) != 1 {
+		return
+	}
+	locate.Del(hash)
+	os.Rename(files[0], os.Getenv("STORAGE_PATH")+"/garbage/"+filepath.Base(files[0]))
 }

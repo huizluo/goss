@@ -1,6 +1,7 @@
 package objects
 
 import (
+	"compress/gzip"
 	"fmt"
 	"goss/app/apiserver/heartbeat"
 	"goss/app/apiserver/locate"
@@ -83,12 +84,29 @@ func get(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-range",fmt.Sprintf("bytes %d-%d/%d",offset,meta.Size-1,meta.Size))
 		w.WriteHeader(http.StatusPartialContent)
 	}
-
-	//write buffer
-	if _, e := io.Copy(w, stream); e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusNotFound)
-		return
+	//if enabled gzip
+	acceptGzip := false
+	accept_encoding:= r.Header["Accept-Encoding"]
+	for i:= range accept_encoding{
+		if accept_encoding[i] == "gzip"{
+			acceptGzip = true
+			break
+		}
+	}
+	if acceptGzip{
+		w.Header().Set("content-encoding", "gzip")
+		w2 := gzip.NewWriter(w)
+		if _,e:=io.Copy(w2,stream);e!=nil{
+			log.Println(e)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		w2.Close()
+	}else{
+		//write buffer
+		if _, e := io.Copy(w, stream); e != nil {
+			log.Println(e)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 	stream.Close()
 }

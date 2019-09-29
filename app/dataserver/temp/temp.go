@@ -1,6 +1,7 @@
 package temp
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"goss/app/dataserver/locate"
@@ -34,12 +35,23 @@ func commitTempObject(datFile string, info *tempInfo) {
 	fd, e := os.Open(datFile)
 	if e != nil {
 		log.Println(e)
+		return
 	}
+	defer fd.Close()
 	d := url.PathEscape(utils.CalculateHash(fd))
-	fd.Close()
-	if e := os.Rename(datFile, os.Getenv("STORAGE_PATH")+"/objects/"+info.Name+"."+d); e != nil {
+	fd.Seek(0,io.SeekStart)
+	w,e:=os.Create(os.Getenv("STORAGE_PATH")+"/objects/"+info.Name+"."+d)
+	if e!=nil{
 		log.Println(e)
+		return
 	}
+	w2:=gzip.NewWriter(w)
+	if _,e:=io.Copy(w2,fd);e!=nil{
+		log.Println(e)
+		return
+	}
+	w2.Close()
+	os.Remove(datFile)
 	locate.Add(info.hash(), info.id())
 }
 
