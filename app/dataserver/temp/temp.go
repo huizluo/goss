@@ -2,6 +2,7 @@ package temp
 
 import (
 	"encoding/json"
+	"fmt"
 	"goss/app/dataserver/locate"
 	"goss/pkg/utils"
 	"io"
@@ -30,16 +31,46 @@ func (t *tempInfo) id() int {
 	return id
 }
 func commitTempObject(datFile string, info *tempInfo) {
-	fd,e:=os.Open(datFile)
-	if e!=nil{
+	fd, e := os.Open(datFile)
+	if e != nil {
 		log.Println(e)
 	}
-	d:=url.PathEscape(utils.CalculateHash(fd))
+	d := url.PathEscape(utils.CalculateHash(fd))
 	fd.Close()
-	if e :=os.Rename(datFile, os.Getenv("STORAGE_PATH")+"/objects/"+info.Name + "." + d);e!=nil{
+	if e := os.Rename(datFile, os.Getenv("STORAGE_PATH")+"/objects/"+info.Name+"."+d); e != nil {
 		log.Println(e)
 	}
-	locate.Add(info.hash(),info.id())
+	locate.Add(info.hash(), info.id())
+}
+
+func head(w http.ResponseWriter, r *http.Request) {
+	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
+	f, e := os.Open(os.Getenv("STORAGE_ROOT") + "/temp/" + uuid + ".dat")
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	defer f.Close()
+	info, e := f.Stat()
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("content-length", fmt.Sprintf("%d", info.Size()))
+}
+
+func get(w http.ResponseWriter, r *http.Request) {
+	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
+	f, e := os.Open(os.Getenv("STORAGE_ROOT") + "/temp/" + uuid + ".dat")
+	if e != nil {
+		log.Println(e)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	defer f.Close()
+	io.Copy(w, f)
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
@@ -104,8 +135,8 @@ func readFromFile(uuid string) (*tempInfo, error) {
 func post(w http.ResponseWriter, r *http.Request) {
 	log.Println("上传对象")
 	log.Println(os.Getwd())
-	uuid,e:=utils.NewUUID()
-	if e!=nil{
+	uuid, e := utils.NewUUID()
+	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -124,8 +155,8 @@ func post(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	f,e:=os.Create(os.Getenv("STORAGE_PATH") + "/temp/" + t.Uuid + ".dat")
-	if e!=nil{
+	f, e := os.Create(os.Getenv("STORAGE_PATH") + "/temp/" + t.Uuid + ".dat")
+	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 	}

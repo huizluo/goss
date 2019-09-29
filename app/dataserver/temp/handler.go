@@ -8,6 +8,14 @@ import (
 func Handler(w http.ResponseWriter, r *http.Request) {
 	log.Println("---------------------")
 	m := r.Method
+	if m == http.MethodHead {
+		head(w, r)
+		return
+	}
+	if m == http.MethodGet {
+		get(w, r)
+		return
+	}
 	if m == http.MethodPut {
 		put(w, r)
 		return
