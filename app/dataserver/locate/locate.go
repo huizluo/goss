@@ -2,6 +2,7 @@ package locate
 
 import (
 	"goss/pkg/rabbitmq"
+	"goss/pkg/types"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,16 +18,19 @@ func IsExist(name string) bool {
 	return !os.IsNotExist(err)
 }
 
-func Locate(hash string) bool {
+func Locate(hash string) int {
 	mutex.Lock()
-	_, ok := objs[hash]
+	id, ok := objs[hash]
 	mutex.Unlock()
-	return ok
+	if !ok{
+		return -1
+	}
+	return id
 }
 
-func Add(hash string) {
+func Add(hash string,id int) {
 	mutex.Lock()
-	objs[hash] = 1
+	objs[hash] = id
 	mutex.Unlock()
 }
 
@@ -48,9 +52,9 @@ func StartLocate() {
 		if e != nil {
 			panic(e)
 		}
-		exist := Locate(hash)
-		if exist {
-			q.Send(msg.ReplyTo, "127.0.0.1:8061")
+		id := Locate(hash)
+		if id!=-1 {
+			q.Send(msg.ReplyTo, types.LocateMessage{Addr:os.Getenv("LISTEN_ADDR"),Id:id})
 		}
 	}
 }

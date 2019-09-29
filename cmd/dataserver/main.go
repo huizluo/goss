@@ -7,6 +7,7 @@ import (
 	"goss/app/dataserver/temp"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -15,5 +16,5 @@ func main() {
 	go locate.StartLocate()
 	http.HandleFunc("/objects/", objects.Handler)
 	http.HandleFunc("/temp/", temp.Handler)
-	log.Fatal(http.ListenAndServe(objects.LISTEN_ADDRESS, nil))
+	log.Fatal(http.ListenAndServe(os.Getenv("LISTEN_ADDR"), nil))
 }

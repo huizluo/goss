@@ -3,14 +3,14 @@ package objects
 import (
 	"fmt"
 	"goss/app/apiserver/heartbeat"
-	"goss/pkg/objectstream"
+	"goss/pkg/rs"
 )
 
-func putStream(hash string,size int64) (*objectstream.TempPutStream, error) {
-	server := heartbeat.ChooseRandomDataServer()
-	if server == "" {
-		return nil, fmt.Errorf("cannot find any dataServer")
+func putStream(hash string,size int64) (*rs.RSPutStream, error) {
+	servers := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS,nil)
+	if len(servers) != rs.ALL_SHARDS {
+		return nil, fmt.Errorf("cannot find enough dataServer")
 	}
 
-	return objectstream.NewTempPutStream(server, hash,size)
+	return rs.NewRSPutStream(servers,hash,size)
 }

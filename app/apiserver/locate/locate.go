@@ -1,14 +1,15 @@
 package locate
 
 import (
+	"encoding/json"
 	"goss/pkg/rabbitmq"
-	"log"
+	"goss/pkg/rs"
+	"goss/pkg/types"
 	"os"
-	"strconv"
 	"time"
 )
 
-func Locate(name string) string {
+func Locate(name string) (locateInfo map[int]string) {
 	q := rabbitmq.New(os.Getenv("MQ_SERVER"))
 	q.Publish("dataServers", name)
 	c := q.Consume()
@@ -16,12 +17,19 @@ func Locate(name string) string {
 		time.Sleep(time.Second)
 		q.Close()
 	}()
-	msg := <-c
-	s, _ := strconv.Unquote(string(msg.Body))
-	log.Println("dataserver msg:",s)
-	return s
+	locateInfo = make(map[int]string)
+	for i := 0; i < rs.ALL_SHARDS; i++ {
+		msg := <-c
+		if len(msg.Body) == 0 {
+			return
+		}
+		var info types.LocateMessage
+		json.Unmarshal(msg.Body, &info)
+		locateInfo[info.Id] = info.Addr
+	}
+	return
 }
 
 func IsExist(name string) bool {
-	return Locate(name) != ""
+	return len(Locate(name)) >= rs.DATA_SHARDS
 }

@@ -25,6 +25,8 @@ func ListenHeartbeat() {
 	//	mux.Unlock()
 	//}
 	dataServers["127.0.0.1:8061"] = time.Now()
+	dataServers["127.0.0.1:8062"] = time.Now()
+	dataServers["127.0.0.1:8063"] = time.Now()
 }
 
 func removeExpiredDataServer() {

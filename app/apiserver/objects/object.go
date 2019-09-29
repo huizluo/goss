@@ -67,7 +67,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 	obj := url.PathEscape(meta.Hash)
 
-	stream, e := getStream(obj)
+	stream, e := GetStream(obj,meta.Size)
 
 	if e != nil {
 		log.Println(e)
@@ -77,7 +77,10 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 	if _, e := io.Copy(w, stream); e != nil {
 		log.Println(e)
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
+	stream.Close()
 }
 
 func del(w http.ResponseWriter, r *http.Request) {

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -28,11 +29,17 @@ func (t *tempInfo) id() int {
 	id, _ := strconv.Atoi(s[1])
 	return id
 }
-func commitTempObject(datFile string, info tempInfo) {
-	if e :=os.Rename(datFile, os.Getenv("STORAGE_PATH")+"/objects/"+info.Name);e!=nil{
+func commitTempObject(datFile string, info *tempInfo) {
+	fd,e:=os.Open(datFile)
+	if e!=nil{
 		log.Println(e)
 	}
-	locate.Add(info.Name)
+	d:=url.PathEscape(utils.CalculateHash(fd))
+	fd.Close()
+	if e :=os.Rename(datFile, os.Getenv("STORAGE_PATH")+"/objects/"+info.Name + "." + d);e!=nil{
+		log.Println(e)
+	}
+	locate.Add(info.hash(),info.id())
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
@@ -172,5 +179,5 @@ func put(w http.ResponseWriter, r *http.Request) {
 
 	f.Close()
 	log.Println("临时对象转正")
-	commitTempObject(datFile, *tempinfo)
+	commitTempObject(datFile, tempinfo)
 }
