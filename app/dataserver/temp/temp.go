@@ -37,7 +37,6 @@ func commitTempObject(datFile string, info *tempInfo) {
 		log.Println(e)
 		return
 	}
-	defer fd.Close()
 	d := url.PathEscape(utils.CalculateHash(fd))
 	fd.Seek(0,io.SeekStart)
 	w,e:=os.Create(os.Getenv("STORAGE_PATH")+"/objects/"+info.Name+"."+d)
@@ -50,6 +49,8 @@ func commitTempObject(datFile string, info *tempInfo) {
 		log.Println(e)
 		return
 	}
+
+	fd.Close()
 	w2.Close()
 	os.Remove(datFile)
 	locate.Add(info.hash(), info.id())
@@ -212,7 +213,10 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	actual := info.Size()
-	os.Remove(infoFile)
+	if e:=os.Remove(infoFile);e!=nil{
+		log.Println("delete temp obj data error ",e.Error())
+	}
+
 	if actual != tempinfo.Size {
 		os.Remove(datFile)
 		log.Println("actual size mismatch, expect", tempinfo.Size, "actual", actual)

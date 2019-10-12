@@ -9,6 +9,7 @@ import (
 	"goss/pkg/rs"
 	"goss/pkg/utils"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -112,18 +113,44 @@ func get(w http.ResponseWriter, r *http.Request) {
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
-	name := strings.Split(r.URL.EscapedPath(), "/")[2]
-	version, e := elasticsearch.SearchLatestVersion(name)
-	if e != nil {
+	//name := strings.Split(r.URL.EscapedPath(), "/")[2]
+	name:= r.URL.Query()["name"][0]
+	version:= r.URL.Query()["version"][0]
+	fmt.Println("name is ",name)
+	fmt.Println("version is ",version)
+	v,_ := strconv.Atoi(version)
+	meta,e:=elasticsearch.GetMetadata(name,v)
+	if e!=nil{
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	e = elasticsearch.PutMetadata(name, version.Version+1, 0, "")
-	if e != nil {
-		log.Println(e)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	//version, e := elasticsearch.SearchLatestVersion(name)
+	//if e != nil {
+	//	log.Println(e)
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	return
+	//}
+	//e = elasticsearch.PutMetadata(name, version.Version+1, 0, "")
+	//if e != nil {
+	//	log.Println(e)
+	//	w.WriteHeader(http.StatusInternalServerError)
+	//	return
+	//}
+	elasticsearch.DelMetadata(name,v)
+	servers:=locate.Locate(meta.Hash)
+	for _,addr:=range servers{
+		req,e:=http.NewRequest(http.MethodDelete,"http://" + addr + "/objects/" + meta.Hash,nil)
+		if e!=nil{
+				log.Println(e)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+		}
+		c:=http.Client{}
+		res,e:=c.Do(req)
+		if res.StatusCode !=200{
+			log.Println(ioutil.ReadAll(res.Body))
+		}
 	}
 }
 

@@ -1,5 +1,5 @@
-export MQ_SERVER=amqp://admin:admin@127.0.0.1:5672
-go run main.go
+
+MQ_SERVER=nats://10.12.32.51:4222 STORAGE_PATH=data/ds1 LISTEN_ADDR=127.0.0.1:8061 go run cmd/dataserver/main.go
 echo -n "this is test3" |openssl dgst -sha256 - binary|base64
 curl -v 127.0.0.1:8060/objects/test2_1 -XPUT -d "this is test2" -H "Digest: SHA_256=d9CFre4DiBDJMtlBcQWiYSIIl581qqJlbhMM0QTI0qA="
 curl -v 127.0.0.1:8060/objects/test2_1 -XPUT -d "this is test3" -H "Digest: SHA-256=2oUvHeq7jQ27Va2y/usI1kSX4cETY9LuevZU9RT+Fuc="

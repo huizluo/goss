@@ -5,10 +5,6 @@ import (
 	"net/http"
 )
 
-const (
-	LISTEN_ADDRESS = "127.0.0.1:8060"
-)
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 	m := r.Method
 	if m == http.MethodPut {
