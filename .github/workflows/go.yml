@@ -18,7 +18,7 @@ jobs:
 
     - name: Get dependencies
       run: |
-         go mod tidy && go mod vendor
+         go mod tidy
 
     - name: Build
       run: go build -o apiserver -v ./cmd/apiserver/main.go && go build -o dataserver -v ./cmd/dataserver/main.go
