@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/huizluo/goss/app/apiServer/objects"
+	"github.com/huizluo/goss/app/apiserver/objects"
 	"github.com/huizluo/goss/pkg/elasticsearch"
 	"github.com/huizluo/goss/pkg/utils"
 	"log"

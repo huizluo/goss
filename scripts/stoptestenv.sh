@@ -1,4 +1,4 @@
 #!/bin/bash
 
-killall apiServer
-killall dataServer
+killall apiserver
+killall dataserver
