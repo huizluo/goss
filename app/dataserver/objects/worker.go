@@ -4,7 +4,7 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
-	"goss/app/dataserver/locate"
+	"github.com/huizluo/goss/app/dataserver/locate"
 	"io"
 	"log"
 	"net/url"
@@ -15,13 +15,13 @@ import (
 
 func sendFile(w io.Writer, file string) {
 	f, e := os.Open(file)
-	if e!=nil{
+	if e != nil {
 		log.Println(e)
 		return
 	}
 	defer f.Close()
-	gzipStream,e:=gzip.NewReader(f)
-	if e!=nil{
+	gzipStream, e := gzip.NewReader(f)
+	if e != nil {
 		log.Println(e)
 		return
 	}
@@ -30,13 +30,13 @@ func sendFile(w io.Writer, file string) {
 }
 
 func getFile(name string) string {
-	files,_:=filepath.Glob(os.Getenv("STORAGE_PATH") + "/objects/" + name + ".*")
-	if len(files)!=1{
+	files, _ := filepath.Glob(os.Getenv("STORAGE_PATH") + "/objects/" + name + ".*")
+	if len(files) != 1 {
 		return ""
 	}
-	file:=files[0]
-	h:=sha256.New()
-	sendFile(h,file)
+	file := files[0]
+	h := sha256.New()
+	sendFile(h, file)
 	d := url.PathEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
 	hash := strings.Split(file, ".")[2]
 	if d != hash {

@@ -1,8 +1,8 @@
 package locate
 
 import (
+	"github.com/huizluo/goss/pkg/types"
 	"github.com/nats-io/nats.go"
-	"goss/pkg/types"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,11 +13,6 @@ import (
 
 var objs = make(map[string]int)
 var mutex sync.Mutex
-
-func IsExist(name string) bool {
-	_, err := os.Stat(name)
-	return !os.IsNotExist(err)
-}
 
 func Locate(hash string) int {
 	log.Println(objs)
@@ -66,9 +61,9 @@ func StartLocate() {
 	defer nc.Close()
 	c, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 
-	c.Subscribe("objwhere", func(subj, reply string, objname string) {
+	_, err := c.Subscribe("objwhere", func(subj, reply string, objname string) {
 		//hash, e := strconv.Unquote(objname)
-		hash:=objname
+		hash := objname
 
 		log.Println("apiServer check file exist hash:", hash)
 		if e != nil {
@@ -78,10 +73,13 @@ func StartLocate() {
 		id := Locate(hash)
 		if id != -1 {
 			c.Publish(reply, &types.LocateMessage{Addr: os.Getenv("LISTEN_ADDR"), Id: id})
-		}else{
+		} else {
 			log.Println("obj is not exist")
 		}
 	})
+	if err != nil {
+		panic("[dataserver] subscribe fail")
+	}
 
 	select {}
 }

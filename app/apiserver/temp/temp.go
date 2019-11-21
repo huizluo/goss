@@ -1,11 +1,11 @@
 package temp
 
 import (
-	"goss/pkg/rs"
-	"goss/pkg/utils"
-	"goss/app/apiserver/locate"
-	"goss/pkg/elasticsearch"
 	"fmt"
+	"github.com/huizluo/goss/app/apiserver/locate"
+	"github.com/huizluo/goss/pkg/elasticsearch"
+	"github.com/huizluo/goss/pkg/rs"
+	"github.com/huizluo/goss/pkg/utils"
 	"io"
 	"log"
 	"net/http"
@@ -28,7 +28,6 @@ func head(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("content-length", fmt.Sprintf("%d", current))
 }
-
 
 func put(w http.ResponseWriter, r *http.Request) {
 	token := strings.Split(r.URL.EscapedPath(), "/")[2]

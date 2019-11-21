@@ -2,7 +2,7 @@ package versions
 
 import (
 	"encoding/json"
-	"goss/pkg/elasticsearch"
+	"github.com/huizluo/goss/pkg/elasticsearch"
 	"log"
 	"net/http"
 	"strings"

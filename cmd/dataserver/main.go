@@ -1,10 +1,10 @@
 package main
 
 import (
-	"goss/app/dataserver/heartbeat"
-	"goss/app/dataserver/locate"
-	"goss/app/dataserver/objects"
-	"goss/app/dataserver/temp"
+	"github.com/huizluo/goss/app/dataserver/heartbeat"
+	"github.com/huizluo/goss/app/dataserver/locate"
+	"github.com/huizluo/goss/app/dataserver/objects"
+	"github.com/huizluo/goss/app/dataserver/temp"
 	"log"
 	"net/http"
 	"os"

@@ -1,8 +1,7 @@
 package main
 
 import (
-	"go-oss/src/lib/es"
-	"goss/pkg/elasticsearch"
+	"github.com/huizluo/goss/pkg/elasticsearch"
 	"log"
 )
 
@@ -17,7 +16,7 @@ func main() {
 	for i := range buckets {
 		bucket := buckets[i]
 		for v := 0; v < bucket.Doc_count-MIN_VERSION_COUNT; v++ {
-			es.DelMetadata(bucket.Key, v+int(bucket.Min_version.Value))
+			elasticsearch.DelMetadata(bucket.Key, v+int(bucket.Min_version.Value))
 		}
 	}
 }

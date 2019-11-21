@@ -2,8 +2,8 @@ package rs
 
 import (
 	"fmt"
+	"github.com/huizluo/goss/pkg/objectstream"
 	"io"
-	"goss/pkg/objectstream"
 )
 
 type RSGetStream struct {

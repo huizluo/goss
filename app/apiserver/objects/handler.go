@@ -22,9 +22,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		del(w, r)
 		return
 	}
-	if m== http.MethodPost{
+	if m == http.MethodPost {
 		log.Println("-----post------")
-		post(w,r)
+		post(w, r)
 		return
 	}
 

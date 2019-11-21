@@ -2,8 +2,8 @@ package objects
 
 import (
 	"fmt"
-	"goss/app/apiserver/locate"
-	"goss/pkg/utils"
+	"github.com/huizluo/goss/app/apiserver/locate"
+	"github.com/huizluo/goss/pkg/utils"
 	"io"
 	"log"
 	"net/http"
@@ -23,7 +23,7 @@ func storeObject(r io.Reader, hash string, size int64) (int, error) {
 
 	reader := io.TeeReader(r, stream)
 	d := utils.CalculateHash(reader)
-	hash,_ = url.PathUnescape(hash)
+	hash, _ = url.PathUnescape(hash)
 	if d != hash {
 		stream.Commit(false)
 		return http.StatusBadRequest, fmt.Errorf("object hash mismatch, calculated=%s, requested=%s", d, hash)

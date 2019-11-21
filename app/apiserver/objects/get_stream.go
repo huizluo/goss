@@ -2,9 +2,9 @@ package objects
 
 import (
 	"fmt"
-	"goss/app/apiserver/locate"
-	"goss/app/apiserver/heartbeat"
-	"goss/pkg/rs"
+	"github.com/huizluo/goss/app/apiserver/heartbeat"
+	"github.com/huizluo/goss/app/apiserver/locate"
+	"github.com/huizluo/goss/pkg/rs"
 )
 
 func GetStream(hash string, size int64) (*rs.RSGetStream, error) {
@@ -18,4 +18,3 @@ func GetStream(hash string, size int64) (*rs.RSGetStream, error) {
 	}
 	return rs.NewRSGetStream(locateInfo, dataServers, hash, size)
 }
-

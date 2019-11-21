@@ -1,4 +1,4 @@
-# goss
+# github.com/huizluo/goss
 golang oss
 
 #next 

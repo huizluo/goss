@@ -4,9 +4,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/huizluo/goss/pkg/objectstream"
+	"github.com/huizluo/goss/pkg/utils"
 	"io"
-	"goss/pkg/objectstream"
-	"goss/pkg/utils"
 	"log"
 	"net/http"
 )

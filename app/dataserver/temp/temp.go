@@ -4,8 +4,8 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"goss/app/dataserver/locate"
-	"goss/pkg/utils"
+	"github.com/huizluo/goss/app/dataserver/locate"
+	"github.com/huizluo/goss/pkg/utils"
 	"io"
 	"io/ioutil"
 	"log"
@@ -38,14 +38,14 @@ func commitTempObject(datFile string, info *tempInfo) {
 		return
 	}
 	d := url.PathEscape(utils.CalculateHash(fd))
-	fd.Seek(0,io.SeekStart)
-	w,e:=os.Create(os.Getenv("STORAGE_PATH")+"/objects/"+info.Name+"."+d)
-	if e!=nil{
+	fd.Seek(0, io.SeekStart)
+	w, e := os.Create(os.Getenv("STORAGE_PATH") + "/objects/" + info.Name + "." + d)
+	if e != nil {
 		log.Println(e)
 		return
 	}
-	w2:=gzip.NewWriter(w)
-	if _,e:=io.Copy(w2,fd);e!=nil{
+	w2 := gzip.NewWriter(w)
+	if _, e := io.Copy(w2, fd); e != nil {
 		log.Println(e)
 		return
 	}
@@ -213,8 +213,8 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	actual := info.Size()
-	if e:=os.Remove(infoFile);e!=nil{
-		log.Println("delete temp obj data error ",e.Error())
+	if e := os.Remove(infoFile); e != nil {
+		log.Println("delete temp obj data error ", e.Error())
 	}
 
 	if actual != tempinfo.Size {

@@ -1,9 +1,9 @@
 package locate
 
 import (
+	"github.com/huizluo/goss/pkg/rs"
+	"github.com/huizluo/goss/pkg/types"
 	"github.com/nats-io/nats.go"
-	"goss/pkg/rs"
-	"goss/pkg/types"
 	"log"
 	"os"
 	"time"
@@ -20,7 +20,7 @@ func Locate(name string) (locateInfo map[int]string) {
 	locateInfo = make(map[int]string)
 	for i := 0; i < rs.ALL_SHARDS; i++ {
 		var info types.LocateMessage
-		log.Println("check obj where!!!",name)
+		log.Println("check obj where!!!", name)
 		e = c.Request("objwhere", name, &info, time.Second*2)
 		log.Println(info.Addr)
 		if e != nil {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"goss/app/apiserver/heartbeat"
-	"goss/app/apiserver/locate"
-	"goss/app/apiserver/objects"
-	"goss/app/apiserver/temp"
-	"goss/app/apiserver/versions"
+	"github.com/huizluo/goss/app/apiserver/heartbeat"
+	"github.com/huizluo/goss/app/apiserver/locate"
+	"github.com/huizluo/goss/app/apiserver/objects"
+	"github.com/huizluo/goss/app/apiserver/temp"
+	"github.com/huizluo/goss/app/apiserver/versions"
 	"log"
 	"net/http"
 )
@@ -15,7 +15,7 @@ func main() {
 	//对象操作
 	http.HandleFunc("/objects/", objects.Handler)
 	//
-	http.HandleFunc("/temp/",temp.Handler)
+	http.HandleFunc("/temp/", temp.Handler)
 	//对象定位
 	http.HandleFunc("/locate/", locate.Handler)
 	//对象版本

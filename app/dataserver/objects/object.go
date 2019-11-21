@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goss/app/dataserver/locate"
+	"github.com/huizluo/goss/app/dataserver/locate"
 )
 
 func put(w http.ResponseWriter, r *http.Request) {
@@ -27,12 +27,12 @@ func put(w http.ResponseWriter, r *http.Request) {
 
 func get(w http.ResponseWriter, r *http.Request) {
 
-	f:=getFile(strings.Split(r.URL.EscapedPath(), "/")[2])
- 	if f==""{
- 		w.WriteHeader(http.StatusNotFound)
+	f := getFile(strings.Split(r.URL.EscapedPath(), "/")[2])
+	if f == "" {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	sendFile(w,f)
+	sendFile(w, f)
 }
 
 func del(w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"goss/pkg/elasticsearch"
+	"github.com/huizluo/goss/pkg/elasticsearch"
 	"log"
 	"net/http"
 	"os"
@@ -32,4 +32,3 @@ func del(hash string) {
 	client := http.Client{}
 	client.Do(request)
 }
-

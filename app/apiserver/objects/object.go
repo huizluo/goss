@@ -3,11 +3,11 @@ package objects
 import (
 	"compress/gzip"
 	"fmt"
-	"goss/app/apiserver/heartbeat"
-	"goss/app/apiserver/locate"
-	"goss/pkg/elasticsearch"
-	"goss/pkg/rs"
-	"goss/pkg/utils"
+	"github.com/huizluo/goss/app/apiserver/heartbeat"
+	"github.com/huizluo/goss/app/apiserver/locate"
+	"github.com/huizluo/goss/pkg/elasticsearch"
+	"github.com/huizluo/goss/pkg/rs"
+	"github.com/huizluo/goss/pkg/utils"
 	"io"
 	"io/ioutil"
 	"log"
@@ -72,37 +72,37 @@ func get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	obj := url.PathEscape(meta.Hash)
-	stream, e := GetStream(obj,meta.Size)
+	stream, e := GetStream(obj, meta.Size)
 	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	//get offset
-	offset:=utils.GetOffsetFromHeader(r.Header)
-	if offset!=0{
-		stream.Seek(offset,io.SeekCurrent)
-		w.Header().Set("content-range",fmt.Sprintf("bytes %d-%d/%d",offset,meta.Size-1,meta.Size))
+	offset := utils.GetOffsetFromHeader(r.Header)
+	if offset != 0 {
+		stream.Seek(offset, io.SeekCurrent)
+		w.Header().Set("content-range", fmt.Sprintf("bytes %d-%d/%d", offset, meta.Size-1, meta.Size))
 		w.WriteHeader(http.StatusPartialContent)
 	}
 	//if enabled gzip
 	acceptGzip := false
-	accept_encoding:= r.Header["Accept-Encoding"]
-	for i:= range accept_encoding{
-		if accept_encoding[i] == "gzip"{
+	accept_encoding := r.Header["Accept-Encoding"]
+	for i := range accept_encoding {
+		if accept_encoding[i] == "gzip" {
 			acceptGzip = true
 			break
 		}
 	}
-	if acceptGzip{
+	if acceptGzip {
 		w.Header().Set("content-encoding", "gzip")
 		w2 := gzip.NewWriter(w)
-		if _,e:=io.Copy(w2,stream);e!=nil{
+		if _, e := io.Copy(w2, stream); e != nil {
 			log.Println(e)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		w2.Close()
-	}else{
+	} else {
 		//write buffer
 		if _, e := io.Copy(w, stream); e != nil {
 			log.Println(e)
@@ -114,13 +114,13 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func del(w http.ResponseWriter, r *http.Request) {
 	//name := strings.Split(r.URL.EscapedPath(), "/")[2]
-	name:= r.URL.Query()["name"][0]
-	version:= r.URL.Query()["version"][0]
-	fmt.Println("name is ",name)
-	fmt.Println("version is ",version)
-	v,_ := strconv.Atoi(version)
-	meta,e:=elasticsearch.GetMetadata(name,v)
-	if e!=nil{
+	name := r.URL.Query()["name"][0]
+	version := r.URL.Query()["version"][0]
+	fmt.Println("name is ", name)
+	fmt.Println("version is ", version)
+	v, _ := strconv.Atoi(version)
+	meta, e := elasticsearch.GetMetadata(name, v)
+	if e != nil {
 		log.Println(e)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -137,18 +137,20 @@ func del(w http.ResponseWriter, r *http.Request) {
 	//	w.WriteHeader(http.StatusInternalServerError)
 	//	return
 	//}
-	elasticsearch.DelMetadata(name,v)
-	servers:=locate.Locate(meta.Hash)
-	for _,addr:=range servers{
-		req,e:=http.NewRequest(http.MethodDelete,"http://" + addr + "/objects/" + meta.Hash,nil)
-		if e!=nil{
-				log.Println(e)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
+	elasticsearch.DelMetadata(name, v)
+	servers := locate.Locate(meta.Hash)
+	for _, addr := range servers {
+		req, e := http.NewRequest(http.MethodDelete, "http://"+addr+"/objects/"+meta.Hash, nil)
+		if e != nil {
+			log.Println(e)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
-		c:=http.Client{}
-		res,e:=c.Do(req)
-		if res.StatusCode !=200{
+		c := http.Client{}
+		res, e := c.Do(req)
+		if e != nil || res == nil {
+			log.Println(e)
+		} else if res.StatusCode != 200 {
 			log.Println(ioutil.ReadAll(res.Body))
 		}
 	}

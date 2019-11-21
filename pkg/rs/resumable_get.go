@@ -1,8 +1,8 @@
 package rs
 
 import (
+	"github.com/huizluo/goss/pkg/objectstream"
 	"io"
-	"goss/pkg/objectstream"
 )
 
 type RSResumableGetStream struct {
